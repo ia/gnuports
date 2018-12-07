@@ -1,0 +1,7 @@
+NAME="flashrom"
+HOMEPAGE="https://www.flashrom.org/Flashrom"
+URL="https://download.flashrom.org/releases/flashrom-1.0.tar.bz2"
+SHA256=""
+INSTALL="make DESTDIR=${PORT_PREFIX} install"
+DEPS_DEB="libpci-dev libusb-dev"
+

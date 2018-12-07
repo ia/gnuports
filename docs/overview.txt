@@ -1,0 +1,117 @@
+
+Raw architecture overview
+
+- Possible default locations:
+/usr/local/gports
+/usr/local/ports
+/usr/local/gnuports
+/opt/gports/
+/opt/ports/
+/opt/gnuports
+/opt/gports
+
+- default location tree
+
+config:
+	GNUPORTS_DIR
+bin/
+	port
+	gnu.port.mk
+db/
+	host1/
+	host2/
+	local/
+		local.ports
+		archive/
+			binutils-...tar.gz
+			gdb-...tar.gz
+		ports/
+			binutils.port
+			gdb.port
+		files/
+			binutils/
+				ver.files
+			gdb/
+				ver.files
+		pkgs/
+			binutils-...port.tar.gz
+			gdb-...port.tar.gz
+		patches/
+			gdb-...name.diff
+		logs/
+			
+src/
+	binutils/
+		ver
+	gdb/
+		ver
+build/
+	binutils_ver/
+	gdb_ver/
+	
+tree/
+	bin/cp
+	bin/...
+	lib/...
+	.../
+
+- ports file format for host management (local.ports):
+# url per line with path to $APP.port file
+http://.../gdb.port
+
+- port file format for ports management (gdb.port):
+# application info
+HOST
+NAME
+VER
+VX / VY / VZ
+SRC ...
+DEPENDS ...
+CONFLICTS
+# building options
+PATCHES
+CC
+CXX
+CFLAGS
+CXXFLAGS
+TARGET
+HOST
+BUILD
+# building commands
+CMD_CONFIG
+CMD_BUILD
+CMD_INSTALL
+
+- engine steps:
+ - get gdb port file
+ - download
+ - place in tree (without files file)
+ - CMD_CONFIG && CMD_BUILD
+ - LOCK
+ - mv usr usr.ports
+ - CMD_INSTALL
+ - find usr > files/gdb.files
+ - check conflict files
+ 	fail:
+		- ERROR
+		- UNLOCK
+ 	pass:
+ - rm -rf usr
+ - mv usr.ports usr
+ - CMD_INSTALL
+ - UNLOCK
+
+- engine flags:
+	[ download | unpack | build | install | pack ] [ name [ver] | file ]
+
+- port package file format (gdb-VER.port.tar.gz):
+gdb-VER.port.tar.gz:
+prefix/
+	bin/
+	lib/
+	...
+meta/
+	port
+	files
+	log
+
