@@ -1,5 +1,8 @@
 # GNU Ports
 
+## **WARNING: HIGHLY EXPERIMENTAL & EXTREMELY DANGEROUS!!!**
+## **NOT READY FOR THE USAGE!!!**
+
 ## What?
 proof-of-concept for minimal tiny basic simple source-based packet manager
 
