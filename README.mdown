@@ -1,0 +1,52 @@
+# GNU Ports
+
+## What?
+proof-of-concept for minimal tiny basic simple source-based packet manager
+
+## Why?
+Goal: get consistent support of software from sources alongside with package systems (rpm/deb) without conflicts.
+
+Inspired by: BSD ports, macports, homebrew, etc.
+
+Main idea: KISS, keep it simple as much, as possible.
+
+## Required GNU tools:
+ - GCC
+ - bash
+ - make
+ - coreutils
+	- cp
+	- rm
+	- mv
+	- touch
+	- sort
+	- uniq
+ - GNU utils
+	- grep
+ - console web downloader:
+	- curl -O / wget / aria2
+ - optional:sum checker:
+	- md5 / sha256 / sha512
+ - optional:VCS:
+	- git
+	- svn
+
+## Basic usage
+
+### Install gnuports:
+
+	$ git clone git@github.com:ia/gnuports.git
+	$ cd gnuports
+	$ sudo ./port self-check
+	$ sudo ./port self-install
+	$ export PATH=/opt/gports/bin:$PATH
+
+### Init current repo base:
+	$ sudo port add-host hosts/ports.github.com
+
+### Install package:
+	$ sudo port install gdb
+
+### Remove package:
+	$ sudo port remove gdb
+
