@@ -1,0 +1,10 @@
+# Random working notes
+
+create function:
+
+make -i -k DESTDIR=${PORT_PREFIX} install
+save to log
+grep: fatal error: .*.h: No such file or directory
+use apt-file to find related libs automagically
+generate DEPS_DEB=""
+
