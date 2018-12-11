@@ -14,8 +14,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-set -e
-set -x
+#set -e
+#set -x
 
 DBG=1
 dbg()
@@ -34,6 +34,10 @@ PORT_ARGTYPE_FILE=18
 
 p_dir=~/.gports
 p_conf="ports.conf"
+
+PORT_ARCHIVE="${p_dir}"/db/local/archive
+PORT_SRC="${p_dir}"/src
+PORT_BUILD="${p_dir}"/build
 
 info="gnuports: proof-of-concept for minimal tiny basic simple source-based packet manager // http://github.com/ia/gnuports"
 
@@ -133,14 +137,15 @@ check_argtype()
 	dbg echo ---- ${FUNCNAME}
 	dbg echo argv=${@}
 	dbg echo argc=${#}
+	dbg echo argv[1]=${1}
 	dbg echo ----
 	
-	echo "${#}" | ${p_grep} -P "^http[s]?://"
+	echo "${1}" | ${p_grep} -P "^http[s]?://"
 	if [ "${?}" -eq 0 ]; then
 		return ${PORT_ARGTYPE_LINK}
 	fi;
 	
-	test -f "${#}"
+	test -f "${1}"
 	if [ "${?}" -eq 0 ]; then
 		return ${PORT_ARGTYPE_FILE}
 	fi;
@@ -157,8 +162,8 @@ self-check()
 	dbg echo ----
 	check_args 0 ${#} ${FUNCNAME}
 	rm -f ${p_conf}
-	tools="gcc g++ make mkdir cp rm mv touch sort uniq grep tee awk"
-	p_tools=( p_cc p_cxx p_make p_mkdir p_cp p_rm p_mv p_touch p_sort p_uniq p_grep p_tee p_awk )
+	tools="gcc g++ make mkdir cp rm mv touch sort uniq grep tee awk wget basename"
+	p_tools=( p_cc p_cxx p_make p_mkdir p_cp p_rm p_mv p_touch p_sort p_uniq p_grep p_tee p_awk p_get p_basename)
 	
 	echo -n "Checking resolve ... "
 	if [ -x "`which readlink`" ]; then
@@ -223,12 +228,12 @@ self-install()
 		echo "DONE"
 	done;
 	
-	echo -n " ===> copying config file ${p_conf} to ${p_dir}"
+	echo -n " ===> copying config file ${p_conf} to ${p_dir} ... "
 	$p_cp ${p_conf} "${p_dir}"/
 	test "${?}" -ne 0 && echo "ERROR: can't copy ${p_conf} in ${p_dir} directory" && exit ${?}
 	echo "DONE"
 	
-	echo -n " ===> copying exec file ${0} to ${p_dir}"
+	echo -n " ===> copying exec file ${0} to ${p_dir} ... "
 	$p_cp ${0} "${p_dir}"/bin/
 	test "${?}" -ne 0 && echo "ERROR: can't copy main script in ${p_dir}/bin directory" && exit ${?}
 	echo "DONE"
@@ -265,20 +270,25 @@ install()
 
 create()
 {
+	source ${p_dir}/${p_conf}
+	
 	dbg echo ---- ${FUNCNAME}
 	dbg echo argv=${@}
 	dbg echo argc=${#}
+	dbg echo target=${1}
 	dbg echo ----
 	
+	target=${1}
 	check_args 1 ${#} ${FUNCNAME}
-	check_argtype ${#}
+	check_argtype ${target}
 	
 	argtype="${?}"
+	echo "argtype == ${argtype}"
 	
 	if [ "${argtype}" -eq "${PORT_ARGTYPE_LINK}" ]; then
-		${p_get} ${#}
+		( cd "${PORT_ARCHIVE}" && ${p_get}  "${target}" )
 		if [ "${?}" -ne 0 ]; then
-			echo "ERROR: can't download ${#} using ${p_get}"
+			echo "ERROR: can't download ${target} using ${p_get}"
 			exit 1
 		fi;
 	elif [ "${argtype}" -eq "${PORT_ARGTYPE_FILE}" ]; then
@@ -288,6 +298,9 @@ create()
 		echo "ERROR: file type is not supported"
 		exit 1
 	fi;
+	
+	app_file="`${p_basename} "${target}"`"
+	
 	
 	echo "do create"
 	echo "NOT IMPLEMENTED"
