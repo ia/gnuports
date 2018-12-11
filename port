@@ -1,0 +1,271 @@
+#!/bin/bash
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+
+DBG=1
+dbg()
+{
+	if [ -n "${DBG}" ]; then
+		${@}
+	fi;
+}
+
+p_dir="/opt/gports"
+p_conf="ports.conf"
+
+info="GNU Ports: proof-of-concept for minimal tiny basic simple source-based packet manager // http://github.com/ia/gnuports"
+
+actions="self-init
+	 self-check
+	 self-install
+	 add-host
+	 add-port
+	 download
+	 unpack
+	 build
+	 install
+	 pack
+	 remove
+	 info
+	 list
+	 find
+	 ''"
+
+usages=( " - full autoinstallation"
+	 " - check environment and generate config file"
+	 " - install GNU Ports files and init environment"
+	 " file - add host file with links to port files"
+	 " file - add port file with control information"
+	 " path - download tarball with sources and place it in tree"
+	 " name - unpack downloaded tarball in tree"
+	 " name - build downloaded and unpacked tarball"
+	 " name - install tarball after building (port)"
+	 " name - pack binary files after building in port tarball"
+	 " name - remove port"
+	 " name - display basic info about installed/available port"
+	 " name - list files for installed port"
+	 " file - find port with file"
+	 )
+
+
+usage()
+{
+	echo "${info}"
+	echo "Usage: port [action] [opts]"
+	echo "Possible [action]s with [opts]:"
+	n=0
+	for a in ${actions}; do
+		if [ "${a}" != "''" ]; then
+			echo -e "\t${a}${usages[${n}]}"
+			n=$((n+1))
+		fi;
+	done;
+	echo
+	exit 1
+}
+
+
+usage_f()
+{
+	func=${1}
+	n=0
+	for a in ${actions}; do
+		if [ "${a}" == "${func}" ]; then
+			break;
+		fi;
+		n=$((n+1))
+	done;
+	echo "Usage: port ${a}${usages[${n}]}"
+	exit 1
+}
+
+
+check_args()
+{
+	required=${1}
+	passed=${2}
+	f=${3}
+	if [ "${required}" -ne "${passed}" ]; then
+		usage_f ${f}
+	fi;
+}
+
+
+check_path()
+{
+#	echo AAAA $p_resolver
+	tname=${1}
+	tool="`${p_resolv} ${tname}`"
+	if [ -x "${tool}" ]; then
+		return 0
+	else
+		return 1
+	fi;
+}
+
+
+self-check()
+{
+	dbg echo ---- ${FUNCNAME}
+	dbg echo argv=${@}
+	dbg echo argc=${#}
+	dbg echo ----
+	check_args 0 ${#} ${FUNCNAME}
+	rm -f ${p_conf}
+	tools="gcc g++ make mkdir cp rm mv touch sort uniq grep tee awk"
+	p_tools=( p_cc p_cxx p_make p_mkdir p_cp p_rm p_mv p_touch p_sort p_uniq p_grep p_tee p_awk )
+	
+	echo -n "Checking resolve ... "
+	if [ -x "`which readlink`" ]; then
+		export p_resolv=readlink\ -f
+	elif [ -x "`which realpath`" ]; then
+		export p_resolv=realpath
+	else
+		echo FAIL
+		exit 1
+	fi;
+	echo $p_resolv
+	
+	n=0
+	for t in ${tools}; do
+		echo -n "Checking ${t} ... "
+		check_path "`which ${t}`"
+		if [ "${?}" -eq 0 ]; then
+			export ${p_tools[${n}]}="${t}"
+			echo "${t}"
+			echo "export ${p_tools[${n}]}=${t}" >> ${p_conf}
+		else
+			echo "FAIL"
+			rm -f ${p_conf}
+			exit 1
+		fi;
+		n=$((n+1))
+	done;
+	echo "Install directory: ${p_dir}"
+	export p_dir=${p_dir}
+	echo "export p_dir=${p_dir}" >> ${p_conf}
+	echo "Generated config file: ${p_conf}"
+	echo "NOTE: edit ${p_conf} file as single shell script for changing any value of any variable as you wish before install"
+}
+
+
+self-install()
+{
+	dbg echo ---- ${FUNCNAME}
+	dbg echo argv=${@}
+	dbg echo argc=${#}
+	dbg echo ----
+	check_args 0 ${#} ${FUNCNAME}
+	
+	if [ ! -f "${p_conf}" ]; then
+		echo "Warning: no config file"
+		self-check
+	fi;
+	
+	source ${p_conf}
+	if [ "${?}" -ne 0 ]; then
+		echo "ERROR: can't init config file"
+	fi;
+	
+	$p_mkdir -p "${p_dir}"
+	test "${?}" -ne 0 && echo "ERROR: can't create ${p_dir} directory" && exit ${?}
+	
+	p_dirs="bin db db/local db/local/archive db/local/ports db/local/files db/local/pkgs db/local/patches db/local/logs src build tree"
+	for d in ${p_dirs}; do
+		echo -n " ===> creating ${p_dir}/${d} directory ... "
+		$p_mkdir "${p_dir}"/${d}
+		test "${?}" -ne 0 && echo "ERROR: can't create ${p_dir}/${d} directory" && exit ${?}
+		echo "DONE"
+	done;
+	
+	echo -n " ===> copying config file ${p_conf} to ${p_dir}"
+	$p_cp ${p_conf} "${p_dir}"/
+	test "${?}" -ne 0 && echo "ERROR: can't copy ${p_conf} in ${p_dir} directory" && exit ${?}
+	echo "DONE"
+	
+	echo -n " ===> copying exec file ${0} to ${p_dir}"
+	$p_cp ${0} "${p_dir}"/bin/
+	test "${?}" -ne 0 && echo "ERROR: can't copy main script in ${p_dir}/bin directory" && exit ${?}
+	echo "DONE"
+}
+
+
+self-init()
+{
+	dbg echo ---- ${FUNCNAME}
+	dbg echo argv=${@}
+	dbg echo argc=${#}
+	dbg echo ----
+	check_args 0 ${#} ${FUNCNAME}
+	
+	echo "do self init"
+	echo "NOT IMPLEMENTED"
+	# self-check
+	# self-install
+}
+
+
+install()
+{
+	dbg echo ---- ${FUNCNAME}
+	dbg echo argv=${@}
+	dbg echo argc=${#}
+	dbg echo ----
+	check_args 1 ${#} ${FUNCNAME}
+	
+	echo "do install"
+	echo "NOT IMPLEMENTED"
+}
+
+
+do_action()
+{
+	action=${1}
+	if [ -z "${action}" ]; then
+		usage
+	fi;
+	for a in ${actions}; do
+		if [ "${a}" == "${action}" ]; then
+			break;
+		fi;
+	done;
+	if [ "${a}" == "''" ]; then
+		usage
+	else
+		shift
+		${action} ${@}
+	fi;
+}
+
+
+main()
+{
+	argv=${@}
+	argc=${#}
+	dbg echo ---- $FUNCNAME
+	dbg echo argv=${argv}
+	dbg echo argc=${argc}
+	dbg echo ----
+	if [ ${argc} -lt 1 ]; then
+		usage
+	fi;
+	do_action ${@}
+}
+
+
+main ${@}
+
+
