@@ -39,6 +39,7 @@ actions="self-init
 	 install
 	 pack
 	 remove
+	 create
 	 info
 	 list
 	 find
@@ -55,6 +56,7 @@ usages=( " - full autoinstallation"
 	 " name - install tarball after building (port)"
 	 " name - pack binary files after building in port tarball"
 	 " name - remove port"
+	 " file|link - create port"
 	 " name - display basic info about installed/available port"
 	 " name - list files for installed port"
 	 " file - find port with file"
@@ -227,6 +229,19 @@ install()
 	check_args 1 ${#} ${FUNCNAME}
 	
 	echo "do install"
+	echo "NOT IMPLEMENTED"
+}
+
+
+create()
+{
+	dbg echo ---- ${FUNCNAME}
+	dbg echo argv=${@}
+	dbg echo argc=${#}
+	dbg echo ----
+	check_args 1 ${#} ${FUNCNAME}
+	
+	echo "do create"
 	echo "NOT IMPLEMENTED"
 }
 
