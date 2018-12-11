@@ -33,7 +33,7 @@ PORT_ARGTYPE_FILE=18
 p_dir="~/.gports"
 p_conf="~/.port.rc"
 
-info="GNU Ports: proof-of-concept for minimal tiny basic simple source-based packet manager // http://github.com/ia/gnuports"
+info="gnuports: proof-of-concept for minimal tiny basic simple source-based packet manager // http://github.com/ia/gnuports"
 
 actions="self-init
 	 self-check
