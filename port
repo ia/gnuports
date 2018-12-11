@@ -23,6 +23,10 @@ dbg()
 	fi;
 }
 
+PORT_ARGTYPE_ERR=2
+PORT_ARGTYPE_LINK=17
+PORT_ARGTYPE_FILE=18
+
 p_dir="/opt/gports"
 p_conf="ports.conf"
 
@@ -116,6 +120,27 @@ check_path()
 	else
 		return 1
 	fi;
+}
+
+
+check_argtype()
+{
+	dbg echo ---- ${FUNCNAME}
+	dbg echo argv=${@}
+	dbg echo argc=${#}
+	dbg echo ----
+	
+	echo "${#}" | ${p_grep} -P "^http[s]?://"
+	if [ "${?}" -eq 0 ]; then
+		return ${PORT_ARGTYPE_LINK}
+	fi;
+	
+	test -f "${#}"
+	if [ "${?}" -eq 0 ]; then
+		return ${PORT_ARGTYPE_FILE}
+	fi;
+	
+	return ${PORT_ARGTYPE_ERR}
 }
 
 
@@ -239,7 +264,25 @@ create()
 	dbg echo argv=${@}
 	dbg echo argc=${#}
 	dbg echo ----
+	
 	check_args 1 ${#} ${FUNCNAME}
+	check_argtype ${#}
+	
+	argtype="${?}"
+	
+	if [ "${argtype}" -eq "${PORT_ARGTYPE_LINK}" ]; then
+		${p_get} ${#}
+		if [ "${?}" -ne 0 ]; then
+			echo "ERROR: can't download ${#} using ${p_get}"
+			exit 1
+		fi;
+	elif [ "${argtype}" -eq "${PORT_ARGTYPE_FILE}" ]; then
+		echo "do create PORT_ARGTYPE_FILE"
+		echo "NOT IMPLEMENTED"
+	else
+		echo "ERROR: file type is not supported"
+		exit 1
+	fi;
 	
 	echo "do create"
 	echo "NOT IMPLEMENTED"
