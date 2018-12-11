@@ -1,7 +1,8 @@
 # GNU* Ports
 
+
 ________
-* not affiliated with [`GNU` project](https://www.gnu.org) project  
+* not affiliated with [`GNU` project](https://www.gnu.org)  
 nor with any other related [`FSF` project](https://www.fsf.org)
 
 
