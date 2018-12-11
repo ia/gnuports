@@ -162,8 +162,8 @@ self-check()
 	dbg echo ----
 	check_args 0 ${#} ${FUNCNAME}
 	rm -f ${p_conf}
-	tools="gcc g++ make mkdir cp rm mv touch sort uniq grep tee awk wget basename"
-	p_tools=( p_cc p_cxx p_make p_mkdir p_cp p_rm p_mv p_touch p_sort p_uniq p_grep p_tee p_awk p_get p_basename)
+	tools="gcc g++ make mkdir cp rm mv touch sort uniq grep tee awk wget basename sed find"
+	p_tools=( p_cc p_cxx p_make p_mkdir p_cp p_rm p_mv p_touch p_sort p_uniq p_grep p_tee p_awk p_get p_basename p_sed p_find)
 	
 	echo -n "Checking resolve ... "
 	if [ -x "`which readlink`" ]; then
@@ -300,7 +300,11 @@ create()
 	fi;
 	
 	app_file="`${p_basename} "${target}"`"
+	app_name="`echo "${app_file}" | ${p_awk} -F '-' '{ OFS=FS; $NF=""; print $0 }' | ${p_sed} 's,-$,,'`"
+	app_dir="`echo "${app_file}" | ${p_awk} -F '.t' '{ print $1 }'`"
+	app_version="`echo "${app_dir}" | ${p_awk} -F '-' '{ print $NF }'`"
 	
+	echo "file: $app_file // name: $app_name // dir: $app_dir // version: $app_version"
 	
 	echo "do create"
 	echo "NOT IMPLEMENTED"
