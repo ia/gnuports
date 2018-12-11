@@ -1,4 +1,9 @@
-# GNU Ports
+# GNU* Ports
+
+________
+* not affiliated with [`GNU` project](https://www.gnu.org) project  
+nor with any other related [`FSF` project](https://www.fsf.org)
+
 
 ## **WARNING: HIGHLY EXPERIMENTAL & EXTREMELY DANGEROUS!!!**
 ## **NOT READY FOR THE USAGE!!!**
