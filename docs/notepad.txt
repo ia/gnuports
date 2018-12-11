@@ -1,10 +1,26 @@
 # Random working notes
 
-create function:
+## create function:
 
 make -i -k DESTDIR=${PORT_PREFIX} install
 save to log
 grep: fatal error: .*.h: No such file or directory
 use apt-file to find related libs automagically
 generate DEPS_DEB=""
+
+## regexp parsing tricks:
+
+na-me-version.t[ar.]XX
+
+$ echo "a-b-c-d" | awk -F '-' '{print $NF}'
+d
+
+$ echo "na-me-version.t[ar.]XX" | awk -F '-' '{print $NF}'
+version.t[ar.]XX
+
+$ echo "na-me-version.t[ar.]XX" | awk -F '-' '{$NF="";print $0}'
+na me
+
+$ echo "na-me-version.t[ar.]XX" | awk -F '-' '{ OFS=FS; $NF=""; print $0 }' | sed 's,-$,,'
+na-me
 
