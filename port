@@ -27,11 +27,11 @@ PORT_ARGTYPE_ERR=2
 PORT_ARGTYPE_LINK=17
 PORT_ARGTYPE_FILE=18
 
-#p_dir="/opt/gports"
-#p_conf="ports.conf"
+#p_dir=/opt/gports
+#p_conf=ports.conf
 
-p_dir="~/.gports"
-p_conf="~/.port.rc"
+p_dir=~/.gports
+p_conf="ports.conf"
 
 info="gnuports: proof-of-concept for minimal tiny basic simple source-based packet manager // http://github.com/ia/gnuports"
 
