@@ -31,4 +31,11 @@ na me
 $ echo "na-me-version.t[ar.]XX" | awk -F '-' '{ OFS=FS; $NF=""; print $0 }' | sed 's,-$,,'
 na-me
 
+cat flashrom_make_prepare.log | grep "fatal error: .* No such file or directory" | awk -F ':' '{print $5}' | sort | uniq
+headers=""
+
+for h in headers; do
+  p = apt-file h
+  packages += p
+done;
 
