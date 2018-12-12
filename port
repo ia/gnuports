@@ -162,8 +162,8 @@ self-check()
 	dbg echo ----
 	check_args 0 ${#} ${FUNCNAME}
 	rm -f ${p_conf}
-	tools="gcc g++ make mkdir cp rm mv touch sort uniq grep tee awk wget basename sed find"
-	p_tools=( p_cc p_cxx p_make p_mkdir p_cp p_rm p_mv p_touch p_sort p_uniq p_grep p_tee p_awk p_get p_basename p_sed p_find)
+	tools="gcc g++ make mkdir cp rm mv touch sort uniq grep tee awk wget basename sed find sha256sum tar"
+	p_tools=( p_cc p_cxx p_make p_mkdir p_cp p_rm p_mv p_touch p_sort p_uniq p_grep p_tee p_awk p_get p_basename p_sed p_find p_sha256 p_tar)
 	
 	echo -n "Checking resolve ... "
 	if [ -x "`which readlink`" ]; then
@@ -303,8 +303,40 @@ create()
 	app_name="`echo "${app_file}" | ${p_awk} -F '-' '{ OFS=FS; $NF=""; print $0 }' | ${p_sed} 's,-$,,'`"
 	app_dir="`echo "${app_file}" | ${p_awk} -F '.t' '{ print $1 }'`"
 	app_version="`echo "${app_dir}" | ${p_awk} -F '-' '{ print $NF }'`"
+	app_port=${app_name}.port
+	app_sum="`${p_sha256} "${PORT_ARCHIVE}"/${app_file} | ${p_awk} '{print $1}'`"
 	
 	echo "file: $app_file // name: $app_name // dir: $app_dir // version: $app_version"
+	
+	#ln "${PORT_ARCHIVE}"/${app_file} "${PORT_SRC}"/
+	${p_tar}  -C "${PORT_SRC}"/  -xf "${PORT_ARCHIVE}"/${app_file}
+	${p_tar}  -C "${PORT_BUILD}"/  -xf "${PORT_ARCHIVE}"/${app_file}
+	
+	if [ -f "${PORT_BUILD}"/"${app_dir}"/Makefile ]; then
+		app_cmd_prepare="make -i -k DESTDIR=${PORT_PREFIX}"
+		app_cmd_build="make DESTDIR=\${PORT_PREFIX}"
+		app_cmd_install="${app_cmd_build} install"
+	fi;
+	
+	echo "( cd "${PORT_BUILD}"/"${app_dir}" && ${app_cmd_prepare} 2>&1 | ${p_tee} "${app_name}"_make_prepare.log )"
+	( cd "${PORT_BUILD}"/"${app_dir}" && ${app_cmd_prepare} 2>&1 | ${p_tee} "${app_name}"_make_prepare.log )
+	
+	# TODO:
+	# - parse log here
+	# - find error messages like:
+	# dediprog.c:30:20: fatal error: libusb.h: No such file or directory
+	# - use apt-file to detect related packages
+	# - put packages in DEPS_DEB=
+	
+	#cat ${p_tee} "${app_name}"_make_prepare.log
+	
+	echo "NAME=${app_name}" > "${app_port}"
+	echo "HOMEPAGE=" >> "${app_port}"
+	echo "URL=${target}" >> "${app_port}"
+	echo "VERSION=${app_version}" >> "${app_port}"
+	echo "SHA256=${app_sum}" >> "${app_port}"
+	echo "INSTALL=\"${app_cmd_install}\"" >> "${app_port}"
+	echo "DEPS_DEB=${app_pkg_deps_deb}"
 	
 	echo "do create"
 	echo "NOT IMPLEMENTED"
